@@ -1,6 +1,3 @@
-# command = 'join file_path file_path column_name join_type'
-
-
 def join_inner(f1, f2, index1, index2, headers1, headers2):
     for line1 in f1:
         line1 = line1.strip().split(',')
@@ -8,7 +5,7 @@ def join_inner(f1, f2, index1, index2, headers1, headers2):
             line2 = line2.strip().split(',')
             if line1[index1] == line2[index2]:
                 # TODO: print all values from both files, even if they are the same
-                print(','.join([line1[i] for i in range(len(headers1))] + [line2[i] for i in range(len(headers2)) if headers2[i] not in headers1]))
+                print(','.join([line1[i] for i in range(len(headers1))] + [line2[i] for i in range(len(headers2)) if headers2[i] != headers1[index1]]))
         f2.seek(0)
 
 
@@ -19,10 +16,10 @@ def join_left(f1, f2, index1, index2, headers1, headers2):
         for line2 in f2:
             line2 = line2.strip().split(',')
             if line1[index1] == line2[index2]:
-                print(','.join([line1[i] for i in range(len(headers1))] + [line2[i] for i in range(len(headers2)) if headers2[i] not in headers1]))
+                print(','.join([line1[i] for i in range(len(headers1))] + [line2[i] for i in range(len(headers2)) if headers2[i] != headers1[index1]]))
                 bool_found = True
         if not bool_found:
-            print(','.join([line1[i] for i in range(len(headers1))] + ['' for i in range(len(headers2)) if headers2[i] not in headers1]))
+            print(','.join([line1[i] for i in range(len(headers1))] + ['' for i in range(len(headers2)) if headers2[i] != headers1[index1]]))
         f2.seek(0)
 
 
@@ -51,17 +48,25 @@ def main(*args):
             index2 = header2.index(column_name)
 
             if join_type == 'inner':
-                print(','.join([i + '_1' for i in header1] + [i + '_2' for i in header2 if i not in header1]))
+                print(','.join([i + '_1' for i in header1] + [i + '_2' for i in header2 if i != column_name]))
                 join_inner(f1, f2, index1, index2, headers1=header1, headers2=header2)
             elif join_type == 'left':
-                print(','.join([i + '_1' for i in header1] + [i + '_2' for i in header2 if i not in header1]))
+                print(','.join([i + '_1' for i in header1] + [i + '_2' for i in header2 if i != column_name]))
                 join_left(f1, f2, index1, index2, headers1=header1, headers2=header2)
             elif join_type == 'right':
-                print(','.join([i + '_2' for i in header2] + [i + '_1' for i in header1 if i not in header2]))
+                print(','.join([i + '_2' for i in header2] + [i + '_1' for i in header1 if i != column_name]))
                 join_left(f2, f1, index2, index1, headers1=header2, headers2=header1)
     except FileNotFoundError:
         print('File not found')
 
 
 if __name__ == '__main__':
-    main('data/file1.csv', 'data/file2.csv', 'id', 'right')
+    values = input('Enter values: ').split()
+    if len(values) == 0:
+        print('No values entered')
+    else:
+        if values[0] == 'join':
+            main(*values[1:])
+        else:
+            print('Invalid command')
+    # main('data/file1.csv', 'data/file2.csv', 'id', 'right')
